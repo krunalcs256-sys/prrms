@@ -1,0 +1,5 @@
+package com.demo.auth.enums;
+
+public enum Department {
+    GENERAL, CARDIOLOGY, NEUROLOGY, ORTHOPEDICS, GYNECOLOGY, PEDIATRICS, ONCOLOGY, RADIOLOGY, SURGERY
+}

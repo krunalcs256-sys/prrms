@@ -1,0 +1,1 @@
+ALTER TABLE patients ADD COLUMN assigned_doctor_name VARCHAR(255) NOT NULL DEFAULT 'Unknown';

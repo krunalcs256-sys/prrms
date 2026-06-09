@@ -1,48 +1,26 @@
 package com.demo.referral.client;
 
+import com.demo.referral.dto.request.PatientStatusUpdateRequest;
 import com.demo.referral.dto.response.ApiResponse;
 import com.demo.referral.dto.response.PatientDto;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
-import java.util.Map;
 
-@Component
-@Slf4j
-public class PatientServiceClient {
+@FeignClient(name = "patient-service", url = "${services.patient.url}")
+public interface PatientServiceClient {
 
-    private final RestClient restClient;
+    @PostMapping("/api/patients/batch/by-ids")
+    ApiResponse<List<PatientDto>> getPatientsByIds(
+            @RequestHeader("Authorization") String bearerToken,
+            @RequestBody List<Long> ids);
 
-    public PatientServiceClient(@Value("${services.patient.url}") String patientServiceUrl) {
-        this.restClient = RestClient.builder()
-                .baseUrl(patientServiceUrl)
-                .build();
-    }
-
-    public List<PatientDto> getPatientsByIds(List<Long> ids, String bearerToken) {
-        ApiResponse<List<PatientDto>> response = restClient.post()
-                .uri("/api/patients/batch/by-ids")
-                .header("Authorization", bearerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ids)
-                .retrieve()
-                .body(new ParameterizedTypeReference<ApiResponse<List<PatientDto>>>() {});
-
-        return response != null ? response.data() : List.of();
-    }
-
-    public void updatePatientStatuses(List<Long> patientIds, String status, String bearerToken) {
-        restClient.patch()
-                .uri("/api/patients/batch/status")
-                .header("Authorization", bearerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Map.of("patientIds", patientIds, "status", status))
-                .retrieve()
-                .toBodilessEntity();
-    }
+    @PatchMapping("/api/patients/batch/status")
+    void updatePatientStatuses(
+            @RequestHeader("Authorization") String bearerToken,
+            @RequestBody PatientStatusUpdateRequest request);
 }

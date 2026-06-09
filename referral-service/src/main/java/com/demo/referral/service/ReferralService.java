@@ -2,7 +2,9 @@ package com.demo.referral.service;
 
 import com.demo.referral.client.PatientServiceClient;
 import com.demo.referral.dto.request.BulkReferralRequest;
+import com.demo.referral.dto.request.PatientStatusUpdateRequest;
 import com.demo.referral.dto.request.ReferralStatusRequest;
+import com.demo.referral.dto.response.ApiResponse;
 import com.demo.referral.dto.response.BulkReferralResponse;
 import com.demo.referral.dto.response.PatientDto;
 import com.demo.referral.dto.response.ReferralResponse;
@@ -47,7 +49,8 @@ public class ReferralService {
             throw new BusinessException("Cannot refer patients to yourself");
         }
 
-        List<PatientDto> patients = patientServiceClient.getPatientsByIds(request.patientIds(), bearerToken);
+        ApiResponse<List<PatientDto>> patientResponse = patientServiceClient.getPatientsByIds(bearerToken, request.patientIds());
+        List<PatientDto> patients = patientResponse != null ? patientResponse.data() : List.of();
 
         if (patients.size() != request.patientIds().size()) {
             throw new BusinessException("One or more patient IDs are invalid");
@@ -83,7 +86,8 @@ public class ReferralService {
         List<Referral> saved = referralRepository.saveAll(referrals);
 
         patientServiceClient.updatePatientStatuses(
-                request.patientIds(), PatientStatus.REFERRED_FOR_REVIEW.name(), bearerToken
+                bearerToken,
+                new PatientStatusUpdateRequest(request.patientIds(), PatientStatus.REFERRED_FOR_REVIEW.name())
         );
 
         List<Notification> notifications = saved.stream()

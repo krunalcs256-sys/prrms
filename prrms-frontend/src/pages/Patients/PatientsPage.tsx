@@ -60,7 +60,9 @@ const GENDER_OPTIONS = [
 ];
 
 const PRIORITY_OPTIONS = [
-  { label: 'Normal', value: 'NORMAL' },
+  { label: 'Low', value: 'LOW' },
+  { label: 'Medium', value: 'MEDIUM' },
+  { label: 'High', value: 'HIGH' },
   { label: 'Urgent', value: 'URGENT' },
 ];
 
@@ -511,7 +513,7 @@ export default function PatientsPage() {
           <Form.Item
             name="priority"
             label="Priority"
-            initialValue="NORMAL"
+            initialValue="LOW"
             rules={[{ required: true }]}
           >
             <Select options={PRIORITY_OPTIONS} />

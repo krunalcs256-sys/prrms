@@ -5,11 +5,21 @@ interface AuthState {
   user: AuthUser | null;
   setUser: (user: AuthUser) => void;
   logout: () => void;
-  init: () => void;
+}
+
+function loadUser(): AuthUser | null {
+  try {
+    const stored = localStorage.getItem('user');
+    return stored ? (JSON.parse(stored) as AuthUser) : null;
+  } catch {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    return null;
+  }
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: loadUser(),
   setUser: (user) => {
     localStorage.setItem('token', user.token);
     localStorage.setItem('user', JSON.stringify(user));
@@ -19,16 +29,5 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     set({ user: null });
-  },
-  init: () => {
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      try {
-        set({ user: JSON.parse(stored) as AuthUser });
-      } catch {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-      }
-    }
   },
 }));
